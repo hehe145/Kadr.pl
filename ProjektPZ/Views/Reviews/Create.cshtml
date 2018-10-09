@@ -1,0 +1,40 @@
+﻿@model ProjektPZ.Models.Review
+
+@{
+    ViewBag.Title = "Dodaj recenzje";
+    TempData["id"] = ViewBag.ID;
+}
+
+<h2>Dodaj recenzje filmu "@ViewBag.FTitle"</h2>
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div >
+
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div >
+            Treść
+            <div >
+                @Html.TextAreaFor(model => model.Content,  htmlAttributes : new { @class = "form-control", @rows = 10, @cols = 100} )
+                @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Zapisz" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/Films/Details/@ViewBag.ID">Powrót do filmu</a>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

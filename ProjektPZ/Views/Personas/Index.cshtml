@@ -1,0 +1,73 @@
+﻿@model PagedList.IPagedList<ProjektPZ.Models.Persona>
+@using PagedList.Mvc
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+@{
+    ViewBag.Title = "Lista ludzi kina";
+}
+
+<h2>Lista ludzi kina</h2>
+
+<p>
+    @if (Request.IsAuthenticated)
+    {
+        <h4>@Html.ActionLink("Dodaj nową osobistość", "Create")</h4>
+    }
+    
+</p>
+
+@using (Html.BeginForm())
+{
+    <p>
+        Wyszukaj osobę: @Html.TextBox("searchString", ViewBag.CurrentFilter as string)
+        <input type="submit" value="Wyszukaj" />
+    </p>
+}
+
+<table class="table" style="width: 50%" >
+    <tr>
+        <th></th>
+        <th>
+            @Html.ActionLink("Sortuj po imieniu", "Index", new { sortOrder = ViewBag.NameSortPackParam, currentFilter = ViewBag.CurrentFilter })
+         </th>
+         <th>  
+             @Html.ActionLink("Sortuj po nazwisku", "Index", new { sortOrder = ViewBag.LastNamePackParam , currentFilter = ViewBag.CurrentFilter})
+
+        </th>
+    </tr>
+
+@foreach (var item in Model)
+{
+    <tr onclick="location.href = '@(Url.Action("Details", "Personas", new { id = item.ID }))'">
+
+        <td>
+            <img src="~/Images/p_@(item.ID).jpg"  style="width:100px;height:120px;" href="/Personas/Details/@item.ID"  class="img-fluid " />
+        </td>
+        <td>
+            <a href="/Personas/Details/@item.ID">
+                <h3>@Html.DisplayFor(modelItem => item.FirstName)</h3>
+                <h3>@Html.DisplayFor(modelItem => item.LastName)</h3>
+            </a>
+        </td>
+        <td>
+            @if (Request.IsAuthenticated)
+            {
+                @Html.ActionLink("Edytuj", "Edit", new { id = item.ID }) <br/>
+                
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                @Html.ActionLink("Usuń", "Delete", new { id = item.ID })
+            }
+
+        </td>
+    </tr>
+}
+    @if (Model.Count == 0)
+    {
+        <tr><td>Nie ma osoby</td></tr>
+    }
+</table>
+<br />
+Strona @(Model.PageCount<Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

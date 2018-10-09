@@ -1,0 +1,230 @@
+﻿@model ProjektPZ.Models.PersonaAll
+
+@{
+    ViewBag.Title = "Szczegóły";
+    TempData["IDF"] = Model.Film.ID;
+    
+    int ocena = 0;
+    int suma = 0;
+    int liczbaGlosow = Model.Film.Ratings.Count();
+    if (liczbaGlosow > 0)
+    {
+        foreach (var i in Model.Film.Ratings)
+        {
+            suma += i.Rate;
+            if (i.User.UserName.Equals(User.Identity.Name))
+            {
+                ocena = i.Rate;
+            }
+        }
+        suma /= liczbaGlosow;
+    }
+}
+
+
+<div>
+        <table>
+            <tr>
+                <td>
+                    <img src="~/Images/f_@(Model.Film.ID).jpg" alt="@Model.Film.ID poster" />
+                </td>
+                <td >
+                    <h2>
+                        @Model.Film.Title
+                    </h2>
+                    @if (!Model.Film.Title.Equals(Model.Film.OrgTitle))
+                    {
+                        <h3>
+                            @Model.Film.OrgTitle
+                        </h3>
+                    }
+                    <p>
+                        @Model.Film.Description
+                    </p>
+                    <p>
+                        Rok premiery : @Model.Film.YearOfPremiere
+                    </p>
+                    <p>
+                        Gatunek:
+
+                        @Model.Film.Genre.Name
+                    </p>
+
+                </td>
+            </tr>
+        </table>
+    
+        @if (Request.IsAuthenticated && ViewBag.ID == -1)
+        {
+            <p> <a href="/Films/AddToFavorite/@Model.Film.ID">Dodaj do ulubionych</a></p>
+        }    
+        @if (Request.IsAuthenticated && ViewBag.ID != -1)
+        {
+            <p> <a href="/Films/RemoveFromFavorite/@ViewBag.ID">Usuń z ulubionych</a></p>
+        }
+        <p>
+            <h4>Ocena: @(suma / 10.0) </h4> <h6>Głosy: @liczbaGlosow </h6>
+        </p>
+
+        @if (Request.IsAuthenticated)
+        {
+                <h3>Twoja ocena: @(ocena/10)</h3>
+
+                <h3>Zagłosuj</h3>
+
+                for (int i = 1; i <= 10; i++)
+                {
+                    <a href="/Films/AddRating/?id=@Model.Film.ID&ranting=@i">@i</a>
+                }
+        }
+        else
+        {
+            <p>Zaloguj aby ocenić.</p>
+        }
+    
+        <br />
+        <br />
+
+
+        @if (Request.IsAuthenticated)
+        {
+            <p> <a href="/Reviews/Create/@Model.Film.ID">Dodaj recenzje</a></p>
+        }
+
+        <table class="table" style="width:70%">
+            @foreach (var i in Model.Film.ListOfReviews)
+            {
+                <tr>
+                    <td scope="row" style="width:80%">
+                        <p>Recenzja użytkownika @i.User.UserName.Split('@')[0]</p>
+                        <div>
+                            @if (i.Content.Count() > 200)
+                            {
+                                @i.Content.Substring(0, 200);
+                                <a href="/Reviews/Details/@i.ID">Zobac całą recenzje</a>
+                            }
+                            else
+                            {
+                                @i.Content
+                            }
+                        </div>
+                    </td>
+                    <td scope="row">
+                        @if (Request.IsAuthenticated && User.Identity.Name.Equals(i.User.UserName))
+                        {
+                            <a href="/Reviews/Edit/@i.ID"> | Edytuj</a>
+                            <a href="/Reviews/Delete/@i.ID"> | Usuń</a>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a href="/Reviews/Delete/@i.ID"> | Usuń</a>
+                        }
+
+                    </td>
+                </tr>
+            }
+
+        </table>
+
+        <br />
+        <br />
+
+        <h3>Nagrody</h3>
+
+        <table class="table" style="width: 50%">
+            <tr>
+                <th scope="col">Rok otrzymania</th>
+                <th scope="col">Nazwa nagrody</th>
+                <th scope="col">Kategoria</th>
+                <th scope="col">Osoba</th>
+            </tr>
+
+            @foreach (var i in Model.Film.ListOfAwards.OrderByDescending(x => x.YearOfWining))
+            {
+                <tr>
+                    <td scope="row">
+                        @i.YearOfWining
+                    </td>
+                    <td>
+                        @i.Name
+                    </td>
+                    <td>
+                        @i.ForWhat
+                    </td>
+                    <td>
+                        <a href="/Personas/Details/@i.Persona.ID">
+                            @i.Persona.FirstName
+                            @i.Persona.LastName
+                        </a>
+                    </td>
+                </tr>
+            }
+        </table>
+        @if (Request.IsAuthenticated)
+        {
+            <a href="/Awards/CreateFAward/?idf=@Model.Film.ID">Dodaj nagrodę</a>
+
+        }
+
+        <br />
+        <br />
+
+        <h3>Obsada</h3>
+
+        <table class="table" style="width: 50%">
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Osoba</th>
+                <th scope="col">Rola w filmie</th>
+            </tr>
+
+            @foreach (var i in Model.ListOfPersona)
+            {
+
+                <tr>
+                    <td scope="row">
+                        <img src="~/Images/p_@(i.ID).jpg" style="width:100px;height:120px;" href="/Personas/Details/@(i.ID)" class="img-fluid " />
+                    </td>
+                    <td>
+                        <a href="/Personas/Details/@i.ID">
+                            @i.FirstName
+                            @i.LastName
+                        </a>
+
+                    </td>
+                    <td>
+                        @i.ListOfFilms.Where(x => x.Film == Model.Film).Single().Function
+                    </td>
+
+                </tr>
+
+            }
+
+        </table>
+        @if (Request.IsAuthenticated)
+        {
+            <a href="/FilmHasPersonas/CreateF/?idf=@Model.Film.ID">Dodaj osobę</a>
+        }
+
+        <br />
+        <br />
+
+
+
+</div>
+
+<p>
+    
+    @Html.ActionLink("Powrót do listy", "Index") | 
+
+    @if (Request.IsAuthenticated)
+    {
+        @Html.ActionLink("Edytuj", "Edit", new { id = Model.Film.ID })
+    }
+    |
+    @if (Context.User.IsInRole("Admin"))
+    {
+         @Html.ActionLink("Usuń z bazy", "Delete", new { id = Model.Film.ID }) 
+
+    }
+</p>

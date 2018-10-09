@@ -1,0 +1,32 @@
+﻿@model ProjektPZ.Models.Review
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Usuń</h2>
+
+<h3>Czy jesteś pewny, że chcesz usunąć tą recenzję?</h3>
+<div>
+   
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            Treść
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Content)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Usuń" class="btn btn-default" /> |
+            <a href="/Films/Details/@Model.Film.ID">Powrót do filmu</a>
+        </div>
+    }
+</div>

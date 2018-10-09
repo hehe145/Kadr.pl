@@ -1,0 +1,29 @@
+﻿@model IEnumerable<ProjektPZ.ViewModels.EnrollmentDateGroup>
+@{
+    ViewBag.Title = "Statystyka filmów";
+}
+
+<h2>Statystyka filmów</h2>
+
+<table>
+    <tr>
+        <th>
+            Gatunki filmów
+        </th>
+        <th>
+            Ilość filmów danego gatunku
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Genre.Name)
+            </td>
+            <td>
+                @item.GenreCount;
+            </td>
+        </tr>
+    }
+</table>

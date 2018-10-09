@@ -1,0 +1,168 @@
+﻿@model ProjektPZ.Models.PersonaAll
+@{
+    ViewBag.Title = "Szczegóły";
+    TempData["IDP"] = Model.Persona.ID;
+}
+
+<br />
+<div class="bg-dark text-white">
+    <table>
+        <tr>
+            <td>
+                <img src="~/Images/p_@(Model.Persona.ID).jpg" alt="@Model.Persona.FirstName @Model.Persona.LastName" />
+            </td>
+            <td></td>
+            <td>
+                <h2>
+                    @Model.Persona.FirstName
+                    @Model.Persona.LastName
+                </h2>
+                <p>data urodzenia: @Model.Persona.BirthDate.ToShortDateString()</p>
+                <p>miejsce urodzenia: @Model.Persona.PlaceOfBirth;</p>
+            </td>
+        </tr>
+    </table>
+    
+
+      
+    <br /><br />
+
+    @if (Request.IsAuthenticated)
+    {
+       <p> <a href="/Biographies/Create/@(Model.Persona.ID)">Dodaj biografię</a></p>
+    }
+    <table class="table" style="width:70%">
+        @foreach (var i in Model.Persona.Biographys)
+        {
+            <tr>
+                <td scope="row" style="width:80%">
+                    <p><b>Biografia użytkownika @i.User.UserName.Split('@')[0]</b></p>
+                    <div>
+                        @if (i.Content.Count() > 200)
+                        {
+                            @i.Content.Substring(0, 200);
+                            <a href="/Biographies/Details/@i.ID">Zobacz całą biografię</a>
+                        }
+                        else
+                        {
+                            @i.Content
+                        }
+                    </div>
+                </td>
+                <td scope="row">
+                    @if (Request.IsAuthenticated && User.Identity.Name.Equals(i.User.UserName))
+                    {
+                        <a href="/Biographies/Edit/@i.ID"> | Edytuj</a>
+                        <a href="/Biographies/Delete/@i.ID"> | Usuń</a>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="/Biographies/Delete/@i.ID"> | Usuń</a>
+                    }
+
+                </td>
+            </tr>
+
+        }
+    </table>
+        <br />
+        <br />
+        <h3>Nagrody</h3>
+
+        <table class="table" style="width: 50%">
+            <tr>
+                <th scope="col">Rok otrzymania</th>
+                <th scope="col">Nazwa nagrody</th>
+                <th scope="col">Kategoria</th>
+                <th scope="col">Film</th>
+            </tr>
+
+            @foreach (var i in Model.Persona.Awards.OrderByDescending(x => x.YearOfWining))
+            {
+
+                <tr>
+                    <td scope="row">
+                        @i.YearOfWining
+                    </td>
+                    <td>
+                        @i.Name
+                    </td>
+                    <td>
+                        @i.ForWhat
+                    </td>
+                    <td>
+                        <a href="/Films/Details/@i.Film.ID">
+                            @if (i.Film.OrgTitle.Equals(i.Film.Title))
+                            {
+                                @i.Film.Title
+                            }
+                            else
+                            {
+                                @i.Film.Title <br />
+                                @i.Film.OrgTitle
+                            }
+                        </a>
+                    </td>
+
+
+                </tr>
+            }
+
+        </table>
+        @if (Request.IsAuthenticated)
+        {
+            <a href="/Awards/CreatePAward/?idp=@Model.Persona.ID">Dodaj nagrodę</a>
+
+        }
+
+
+        <br />
+        <br />
+
+
+
+        <h3>Filmografia</h3>
+
+        <table class="table" style="width: 50%">
+            <tr>
+                <th scope="col">Rok premiery</th>
+                <th scope="col">Tytuł fimlu</th>
+                <th scope="col">Rola w filmie</th>
+            </tr>
+
+            @foreach (var i in Model.Persona.ListOfFilms.OrderByDescending(x => x.Film.YearOfPremiere))
+            {
+
+                <tr>
+                    <td scope="row">
+                        @i.Film.YearOfPremiere
+                    </td>
+                    <td>
+                        <a href="/Films/Details/@i.Film.ID">@i.Film.Title</a>
+                    </td>
+                    <td>
+                        @i.Function
+                    </td>
+
+                </tr>
+
+            }
+
+        </table>
+
+        @if (Request.IsAuthenticated)
+        {
+            <a href="/FilmHasPersonas/CreateP/?idp=@Model.Persona.ID">Dodaj film</a>
+
+        }
+
+    <br /><br />
+</div>
+<p>
+    @if (Request.IsAuthenticated)
+    {
+        @Html.ActionLink("Edytuj", "Edit", new { id = Model.Persona.ID })
+    }
+    
+    @Html.ActionLink("Powrót do listy", "Index")
+</p>
